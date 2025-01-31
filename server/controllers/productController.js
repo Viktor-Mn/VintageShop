@@ -4,9 +4,9 @@ const { Product, ProductDetails } = require('../models/models')
 const ApiError = require('../error/ApiError')
 
 class ProductController {
-	async create(req, res) {
+	async create(req, res, next) {
 		try {
-			const { name, price, brandId, typeId, info } = req.body
+			let { name, price, brandId, typeId, info } = req.body
 			const { image_url } = req.files
 			let fileName = uuid.v4() + '.jpg'
 			image_url.mv(path.resolve(__dirname, '..', 'static', fileName))
@@ -19,15 +19,27 @@ class ProductController {
 				image_url: fileName,
 			})
 
+			if (!product || !product.id) {
+				return next(ApiError.badRequest('Продукт не створений'))
+			}
+
 			if (info) {
-				info = JSON.parse(info)
-				info.forEach(element => {
-					ProductDetails.create({
-						name: element.title,
-						description: element.description,
-						productId: product.id,
-					})
-				})
+				try {
+					info = JSON.parse(info)
+
+					for (const element of info) {
+						await ProductDetails.create({
+							title: element.title,
+							description: element.description,
+							productId: product.id,
+						})
+					}
+				} catch (e) {
+					console.error('Error parsing or creating ProductDetails:', e)
+					return next(
+						ApiError.badRequest('Некоректний формат info: ' + e.message)
+					)
+				}
 			}
 
 			return res.json(product)
@@ -73,7 +85,7 @@ class ProductController {
 		const { id } = req.params
 		const product = await Product.findOne({
 			where: { id },
-			include: [{model: ProductDetails, as: 'info'}]
+			include: [{ model: ProductDetails, as: 'info' }],
 		})
 		return res.json(product)
 	}

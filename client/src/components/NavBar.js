@@ -10,6 +10,13 @@ const NavBar = observer(() => {
 	const { user } = useContext(Context)
 	const navigate = useNavigate()
 
+	const logOut = () => {
+		localStorage.removeItem('token')
+		user.setUser({})
+		user.setIsAuth(false)
+		navigate(SHOP_ROUTE)
+	}
+
 	return (
 		<Navbar bg='dark' variant='dark'>
 			<Container>
@@ -22,22 +29,19 @@ const NavBar = observer(() => {
 							variant={'outline-light'}
 							onClick={() => navigate(ADMIN_ROUTE)}
 						>
-							Амін панель
+							Адмін панель
 						</Button>
 						<Button
 							variant={'outline-light'}
 							className='ml-4'
-							onClick={() => navigate(LOGIN_ROUTE)}
+							onClick={() => logOut()}
 						>
 							Вийти
 						</Button>
 					</Nav>
 				) : (
 					<Nav className='ml-auto' style={{ color: 'white' }}>
-						<Button
-							variant={'outline-light'}
-							onClick={() => user.setIsAuth(true)}
-						>
+						<Button variant={'outline-light'} onClick={() => navigate(LOGIN_ROUTE)}>
 							Авторизація
 						</Button>
 					</Nav>

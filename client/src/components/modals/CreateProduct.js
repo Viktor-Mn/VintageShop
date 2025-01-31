@@ -2,6 +2,12 @@ import React, { useContext, useEffect, useState } from 'react'
 import Modal from 'react-bootstrap/Modal'
 import { Button, Dropdown, Form, Row, Col } from 'react-bootstrap'
 import { Context } from '../../index'
+import {
+	createProduct,
+	fetchBrands,
+	fetchProducts,
+	fetchTypes,
+} from '../../http/productAPI'
 import { observer } from 'mobx-react-lite'
 
 const CreateProduct = observer(({ show, onHide }) => {
@@ -10,6 +16,11 @@ const CreateProduct = observer(({ show, onHide }) => {
 	const [price, setPrice] = useState(0)
 	const [file, setFile] = useState(null)
 	const [info, setInfo] = useState([])
+
+	useEffect(() => {
+		fetchTypes().then(data => product.setTypes(data))
+		fetchBrands().then(data => product.setBrands(data))
+	}, [])
 
 	const addInfo = () => {
 		setInfo([...info, { title: '', description: '', number: Date.now() }])
@@ -26,37 +37,45 @@ const CreateProduct = observer(({ show, onHide }) => {
 	}
 
 	const addProduct = () => {
+		console.log('info перед парсингом:', info)
+		console.log(JSON.stringify(info))
 		const formData = new FormData()
 		formData.append('name', name)
 		formData.append('price', `${price}`)
-		formData.append('img', file)
+		formData.append('image_url', file)
 		formData.append('brandId', product.selectedBrand.id)
 		formData.append('typeId', product.selectedType.id)
 		formData.append('info', JSON.stringify(info))
+		createProduct(formData).then(data => onHide())
 	}
 
 	return (
 		<Modal show={show} onHide={onHide} centered>
 			<Modal.Header closeButton>
 				<Modal.Title id='contained-modal-title-vcenter'>
-					Добавить устройство
+					Додати товар
 				</Modal.Title>
 			</Modal.Header>
 			<Modal.Body>
 				<Form>
 					<Dropdown className='mt-2 mb-2'>
 						<Dropdown.Toggle>
-							{product.selectedType.name || 'Виберіть тип'}
+							{product.selectedType.name || 'Оберіть тип'}
 						</Dropdown.Toggle>
 						<Dropdown.Menu>
 							{product.types.map(type => (
-								<Dropdown.Item key={type.id}>{type.name}</Dropdown.Item>
+								<Dropdown.Item
+									onClick={() => product.setSelectedType(type)}
+									key={type.id}
+								>
+									{type.name}
+								</Dropdown.Item>
 							))}
 						</Dropdown.Menu>
 					</Dropdown>
 					<Dropdown className='mt-2 mb-2'>
 						<Dropdown.Toggle>
-							{product.selectedBrand.name || 'Виберіть бренд'}
+							{product.selectedBrand.name || 'Оберіть бренд'}
 						</Dropdown.Toggle>
 						<Dropdown.Menu>
 							{product.brands.map(brand => (
@@ -73,19 +92,19 @@ const CreateProduct = observer(({ show, onHide }) => {
 						value={name}
 						onChange={e => setName(e.target.value)}
 						className='mt-3'
-						placeholder='Введіть назву товару'
+						placeholder='Введите название устройства'
 					/>
 					<Form.Control
 						value={price}
 						onChange={e => setPrice(Number(e.target.value))}
 						className='mt-3'
-						placeholder='Введіть ціну товару'
+						placeholder='Введите стоимость устройства'
 						type='number'
 					/>
 					<Form.Control className='mt-3' type='file' onChange={selectFile} />
 					<hr />
 					<Button variant={'outline-dark'} onClick={addInfo}>
-						Додати новий товар
+						Додати новий опис товару
 					</Button>
 					{info.map(i => (
 						<Row className='mt-4' key={i.number}>
@@ -93,7 +112,7 @@ const CreateProduct = observer(({ show, onHide }) => {
 								<Form.Control
 									value={i.title}
 									onChange={e => changeInfo('title', e.target.value, i.number)}
-									placeholder='Введіть назву характеристики'
+									placeholder='Введите название свойства'
 								/>
 							</Col>
 							<Col md={4}>
@@ -102,7 +121,7 @@ const CreateProduct = observer(({ show, onHide }) => {
 									onChange={e =>
 										changeInfo('description', e.target.value, i.number)
 									}
-									placeholder='Введіть опис характеристики'
+									placeholder='Введите описание свойства'
 								/>
 							</Col>
 							<Col md={4}>
@@ -110,7 +129,7 @@ const CreateProduct = observer(({ show, onHide }) => {
 									onClick={() => removeInfo(i.number)}
 									variant={'outline-danger'}
 								>
-									Удалить
+									Видалити
 								</Button>
 							</Col>
 						</Row>
@@ -119,10 +138,10 @@ const CreateProduct = observer(({ show, onHide }) => {
 			</Modal.Body>
 			<Modal.Footer>
 				<Button variant='outline-danger' onClick={onHide}>
-					Закрыть
+					Закрити
 				</Button>
 				<Button variant='outline-success' onClick={addProduct}>
-					Добавить
+					Додати
 				</Button>
 			</Modal.Footer>
 		</Modal>

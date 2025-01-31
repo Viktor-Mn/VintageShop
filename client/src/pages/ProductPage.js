@@ -2,23 +2,15 @@ import React, { useEffect, useState } from 'react'
 import { Button, Card, Col, Container, Image, Row } from 'react-bootstrap'
 import bigStar from '../assets/bigStar.png'
 import { useParams } from 'react-router-dom'
+import { fetchOneProduct } from '../http/productAPI'
 
 const ProductPage = () => {
-	const product = {
-		id: 1,
-		name: 'Iphone 12 Pro',
-		price: 25000,
-		rating: 5,
-		img: `https://www.ispot.com.ua/image/cache/catalog/import_files/87/87c5b5a8c76c11eb97902c4d5459a249_d0c58982c79111eb97902c4d5459a249-700x700.jpg`,
-	}
 
-    const description = [
-        {id:1, title: 'Оперативная память', description: '5 г6'},
-        {id:2, title: 'Камера', description: '12 мп'},
-        {id:3, title: 'Процессор', description: 'Пентиум 3'},
-        {id:4, title: 'Кол-во ядер', description: '2'},
-        {id:5, title: 'Аккумулятоp', description: '4888'},
-    ]
+	const [product, setProduct] = useState({ info: [] })
+	const { id } = useParams()
+	useEffect(() => {
+		fetchOneProduct(id).then(data => setProduct(data))
+	}, [])
 
 	return (
 		<Container className='mt-3'>
@@ -27,7 +19,7 @@ const ProductPage = () => {
 					<Image
 						width={300}
 						height={300}
-						src={process.env.REACT_APP_API_URL + product.img}
+						src={process.env.REACT_APP_API_URL + product.image_url}
 					/>
 				</Col>
 				<Col md={4}>
@@ -64,7 +56,7 @@ const ProductPage = () => {
 			</Row>
 			<Row className='d-flex flex-column m-3'>
 				<h1>Опис товару:</h1>
-				{description.map((info, index) => (
+				{product.info.map((info, index) => (
 					<Row
 						key={info.id}
 						style={{

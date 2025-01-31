@@ -60,6 +60,7 @@ const ProductDetails = sequelize.define('product_detail', {
 	id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
 	title: { type: DataTypes.STRING, allowNull: false },
 	description: { type: DataTypes.STRING, allowNull: false },
+	productId: { type: DataTypes.INTEGER, allowNull: false },
 })
 
 const TypeBrand = sequelize.define('type_brand', {
