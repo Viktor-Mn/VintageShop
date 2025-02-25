@@ -18,14 +18,20 @@ const Auth = observer(() => {
 		try {
 			let data
 			if (isLogin) {
+				console.log('Спроба входу в систему з email:', email)
 				data = await login(email, password)
+				console.log('Успішний вхід в систему:', data)
 			} else {
+				console.log('Спроба реєстрації з email:', email)
 				data = await registration(email, password)
+				console.log('Успішна реєстрація:', data)
 			}
-			user.setUser(user)
+			user.setUser(data)
 			user.setIsAuth(true)
+			console.log('Користувач авторизований:', user.isAuth)
 			navigate(SHOP_ROUTE)
 		} catch (e) {
+			console.error('Помилка при вході/реєстрації:', e.response.data.message)
 			alert(e.response.data.message)
 		}
 	}

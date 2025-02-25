@@ -7,10 +7,14 @@ import { Context } from '..'
 const AppRouter = () => {
 	const { user } = useContext(Context)
 
-	console.log(user)
+	console.log('Поточний користувач:', user.user)
+	console.log('Користувач авторизований:', user.isAuth)
+	console.log('Роль користувача:', user.user.role)
+
 	return (
 		<Routes>
 			{user.isAuth &&
+				user.user.role === 'ADMIN' &&
 				authRoutes.map(({ path, Component }) => (
 					<Route key={path} path={path} element={<Component />} />
 				))}
